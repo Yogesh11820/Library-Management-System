@@ -18,13 +18,12 @@ def test_students_registration():
     assert response.status_code == 200
     assert json.loads(response.content) == {'message': 'Student information added Successfully'}
 
-    # invalid credentials
-
+    #credentials required
     data  = {"Roll_No" : 200, "Name" : "Puneet"}
 
     response = requests.post(url,json=data)
-    assert response.status_code == 401
-    assert json.loads(response.content) == {'error' : 'All credentials required'}
+    assert response.status_code == 400
+    assert json.loads(response.content) == {'msg' : 'All credentials required'}
 
    # already registered 
    
@@ -55,13 +54,13 @@ def test_book_add():
         assert response.status_code == 409
         assert json.loads(response.content) == {'msg' : 'Book already in the stock'}
 
-        # invalid input
+        # credentials required
 
         data = {"title" : "Harry Potter", "author" : "J. K. Rowling", "pages" :1500, "quantity" : 30}
 
         response = requests.post(url,json=data)
-        assert response.status_code == 401
-        assert json.loads(response.content) == {'error' : 'All credentials required'}
+        assert response.status_code == 400
+        assert json.loads(response.content) == {'msg' : 'All credentials required'}
 
 def test_book_borrowed():
       
@@ -94,7 +93,7 @@ def test_book_borrowed():
 
     # add debt test
     
-     # invalid inputs
+     # student not found 
 
       data = {"Roll_No" : 1078, "book_name" : "Alchemist" }
 
@@ -102,6 +101,14 @@ def test_book_borrowed():
 
       assert response.status_code == 401
       assert json.loads(response.content) == {'msg' : "Incorrect Roll_No or You're not registered"}
+
+      #credentials required 
+
+      data = {}
+      response = requests.get(url,json=data)
+
+      assert response.status_code == 400
+      assert json.loads(response.content) == {'msg' : 'All credentials required'}
 
 def test_book_returned():
       
@@ -122,11 +129,11 @@ def test_book_returned():
       assert response.status_code == 404
       assert json.loads(response.content) == {'msg' : 'No transaction found'}
       
-      # no input from user 
+      # credentials required
       data = {}
       response = requests.put(url,json=data)
       assert response.status_code == 400
-      assert json.loads(response.content) == {'msg' : 'Please enter transaction id'}  
+      assert json.loads(response.content) == {'msg' : 'All credentials required'}
       
       # book already returned
       data = {"transaction_id" : 1}
@@ -155,12 +162,11 @@ def test_update_bookdata():
       assert response.status_code == 200
       assert json.loads(response.content) ==  {'msg' : 'Book author updated successfully'}
      
-      #invalid input  
-
-      data = {'title' : 'Mahabharat' , 'New_author' : 'Vyasmuni'}
+      #credentials required
+      data = {}
       response = requests.put(url,json=data)
-      assert response.status_code == 401
-      assert json.loads(response.content) ==  {'error' : 'Invalid input'}
+      assert response.status_code == 400
+      assert json.loads(response.content) ==  {'msg' : 'All credentials required'}
 
    
       #book not found
@@ -219,12 +225,12 @@ def test_studentdata_update():
       assert response.status_code == 200
       assert json.loads(response.content) ==  {'msg' : 'Student rollno and branch updated successfully'}
 
-      #invalid input
-      data = {"Roll_No" : 105, "New_Roll_No" : "-", "New_Branch" : "IT"}
-
+      #credentials required      
+      
+      data = {}
       response = requests.put(url,json=data)
-      assert response.status_code == 401
-      assert json.loads(response.content) ==  {'msg' : 'Invalid input'}
+      assert response.status_code == 400
+      assert json.loads(response.content) == {'msg' : 'All credentials required'}
 
 
       #student not found
@@ -253,6 +259,19 @@ def test_bookdelete():
       assert response.status_code == 404
       assert json.loads(response.content) ==  {'msg' : 'Book not found'} 
 
+      #credentials required
+      data = {}
+      response = requests.delete(url,json=data)
+      assert response.status_code == 400
+      assert json.loads(response.content) == {'msg' : 'All credentials required'}
+
+      #cannot delete book
+      data = {'book_id' : 10}
+      response = requests.delete(url,json=data)
+      assert response.status_code == 403
+      assert json.loads(response.content) ==  {'msg' : 'Sorry, you cannot delete this book'} 
+
+
 
 def test_studentdelete():
 
@@ -271,3 +290,15 @@ def test_studentdelete():
       response = requests.delete(url,json=data)
       assert response.status_code == 404
       assert json.loads(response.content) ==  {'msg' : 'student not found'}
+
+      #credentials required      
+      data = {}
+      response = requests.delete(url,json=data)
+      assert response.status_code == 400
+      assert json.loads(response.content) == {'msg' : 'All credentials required'}
+
+      #pending debt
+      data = {"Roll_No" : 100}
+      response = requests.delete(url,json=data)
+      assert response.status_code == 403
+      assert json.loads(response.content) ==  {'msg' : 'Because of pending debt you cannot delete this student data'}

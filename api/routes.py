@@ -13,7 +13,7 @@ def students_registration():
     Branch = request.json.get('Branch')
     
     if not Roll_No or not Name or not Branch:
-        return jsonify({'error' : 'All credentials required'}),401
+        return jsonify({'msg' : 'All credentials required'}),400
     
     student = Students.selectBy(Roll_No=Roll_No).getOne(None)
     if student:
@@ -35,7 +35,7 @@ def book_add():
     quantity = request.json.get('quantity')
 
     if not title or not isbn or not author or not pages or quantity<0:
-        return jsonify({'error' : 'All credentials required'}),401
+         return jsonify({'msg' : 'All credentials required'}),400
     
     book_copy = Books.selectBy(isbn=isbn).getOne(None)
 
@@ -54,6 +54,9 @@ def book_borrowed():
     
     Roll_No = request.json.get('Roll_No')
     book_name = request.json.get('book_name')
+    if not Roll_No or not book_name:
+         return jsonify({'msg' : 'All credentials required'}),400
+
     student = Students.selectBy(Roll_No=Roll_No).getOne(None)
     if student:
             book_stock = Books.selectBy(title=book_name).getOne(None)
@@ -88,7 +91,7 @@ def book_returned():
     transaction_id = request.json.get('transaction_id')
     
     if not transaction_id:
-         return jsonify({'msg' : 'Please enter transaction id'}),400
+         return jsonify({'msg' : 'All credentials required'}),400
 
 
     transaction_info = Transactions.selectBy(id=transaction_id).getOne(None)
@@ -119,7 +122,7 @@ def bookdata_update():
     New_author = request.json.get('New_author')
             
     if  not title or not New_title or not New_author :
-         return jsonify({'error' : 'Invalid input'}),401
+         return jsonify({'msg' : 'All credentials required'}),400
     book_info = Books.selectBy(title=title).getOne(None)
 
     if book_info:
@@ -144,7 +147,7 @@ def studentdata_update():
     New_Roll_No = request.json.get('New_Roll_No')
     New_Branch = request.json.get('New_Branch')
     if not Roll_No or not New_Name or not New_Roll_No or not New_Roll_No:
-                 return jsonify({'msg' : 'Invalid input'}),401
+         return jsonify({'msg' : 'All credentials required'}),400
     student_info = Students.selectBy(Roll_No=Roll_No).getOne(None)
 
     if student_info:
@@ -181,11 +184,13 @@ def book_delete():
 
     book_title = request.json.get('book_title')
     book_author = request.json.get('book_author')
+    if not book_title or not book_author:
+         return jsonify({'msg' : 'All credentials required'}),400
     book_info = Books.selectBy(title=book_title,author=book_author).getOne(None)
 
     if book_info:
             if book_info.quantity < 30:
-                 return jsonify({'msg' : 'Sorry, you cannot delete this book'})
+                 return jsonify({'msg' : 'Sorry, you cannot delete this book'}),403
             book_info.destroySelf()                         # delete the book
             return ({'msg' : 'book data deleted'}),200
     return jsonify({'msg' : 'Book not found'}),404
@@ -198,11 +203,13 @@ studentdelete = Blueprint('studentdelete',__name__)
 def student_delete():
      
      Roll_No = request.json.get('Roll_No')
+     if not Roll_No:
+          return jsonify({'msg' : 'All credentials required'}),400
      Student_info = Students.selectBy(Roll_No=Roll_No).getOne(None)
 
      if Student_info:
           if Student_info.Debt > 0:
-               return jsonify({'msg' : 'Because of pending debt you cannot delete this student data'})
+               return jsonify({'msg' : 'Because of pending debt you cannot delete this student data'}),403
           Student_info.destroySelf()
           return jsonify({'msg' : 'student data deleted'}),200
      return jsonify({'msg' : 'student not found'}),404
@@ -214,6 +221,8 @@ topreaders = Blueprint('topreaders',__name__)
 def top_readers():
     
      cnt = request.json.get('cnt')
+     if not cnt:
+          return jsonify({'msg' : 'All credentials required'}),400
      top_readers = Students.select().orderBy('-Readerpoints').limit(cnt)
      
      readerslist = []
@@ -229,6 +238,8 @@ highdemandbook = Blueprint('highdemandbook',__name__)
 def highdemand_book():
     
      cnt = request.json.get('cnt')
+     if not cnt:
+          return jsonify({'msg' : 'All credentials required'}),400
      top_books = Books.selectBy().orderBy('-Ratings').limit(cnt)
 
      books_list = []
