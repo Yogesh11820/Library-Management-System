@@ -3,7 +3,7 @@ from sqlobject import *
 from datetime import datetime
 from model import *
 import os
-from api.routes import studentreg,bookadd,bookborrowed,bookreturned,bookupdate,studentupdate,bookdelete,studentdelete,topreaders,highdemandbook
+from api.routes import studentreg,studentdetails,bookadd,genrebasedbook,bookdetails,bookborrowed,bookreturned,bookupdate,studentupdate,bookdelete,studentdelete,topreaders,highdemandbook
 
 db_filename = os.path.abspath('library.sqlite')
 connection_string = 'sqlite:' + db_filename
@@ -21,7 +21,10 @@ Transactions.createTable(ifNotExists=True)
  
 
 app.register_blueprint(studentreg,url_prefix='/students_registration')
+app.register_blueprint(studentdetails,url_prefix='/student_details')
 app.register_blueprint(bookadd,url_prefix='/book_add')
+app.register_blueprint(genrebasedbook,url_prefix='/genrebased_book')
+app.register_blueprint(bookdetails,url_prefix='/book_details')
 app.register_blueprint(bookborrowed,url_prefix='/book_borrowed')
 app.register_blueprint(bookreturned,url_prefix='/book_returned')
 app.register_blueprint(bookupdate,url_prefix='/bookdata_update')

@@ -11,8 +11,9 @@ class Students(SQLObject):
 
 class Books(SQLObject):
     title = StringCol(length=30,notNone=False)
-    isbn = IntCol(notNone=False,unique=True)
     author = StringCol(length=30,notNone=False)
+    genres = StringCol(length=30,notNone=False)
+    isbn = IntCol(notNone=False,unique=True)
     pages = IntCol(notNone=False)
     quantity = IntCol(notNone=False,default = 0)
     Ratings = IntCol(notNone=False,default=0)

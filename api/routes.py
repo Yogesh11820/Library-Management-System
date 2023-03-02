@@ -23,18 +23,36 @@ def students_registration():
     return jsonify({'message' : 'Student information added Successfully'}),200
 
 
+studentdetails = Blueprint('studentdetails',__name__)
+
+@studentdetails.route('/',methods=['GET'])
+def student_details():
+     Roll_No = request.json.get('Roll_No')
+     if not Roll_No:
+          return jsonify({'msg' : 'All credentials required'}),400
+     
+     student = Students.selectBy(Roll_No=Roll_No).getOne(None)
+
+     if student:
+          student_info = {'id' : student.id,'Roll_No' : student.Roll_No , 'Name' : student.Name , 'Branch' : student.Branch , 'Debt' : student.Debt, 'Readerpoints' : student.Readerpoints}
+          return jsonify(student_info),200
+     return jsonify({'msg' : 'student not found'}),404
+        
+     
+
 bookadd = Blueprint('bookadd',__name__)
 
 @bookadd.route('/',methods=['POST'])
 def book_add(): 
 
     title = request.json.get('title')
-    isbn = request.json.get('isbn')
     author = request.json.get('author')
+    genres = request.json.get('genres')
+    isbn = request.json.get('isbn')
     pages = request.json.get('pages')
     quantity = request.json.get('quantity')
 
-    if not title or not isbn or not author or not pages or quantity<0:
+    if not title or not isbn or not author or not pages or not genres or quantity<0 :
          return jsonify({'msg' : 'All credentials required'}),400
     
     book_copy = Books.selectBy(isbn=isbn).getOne(None)
@@ -43,10 +61,47 @@ def book_add():
         return jsonify({'msg' : 'Book already in the stock'}),409
     
     else:
-        book_copy = Books(title=title, isbn=isbn, author=author, pages=pages, quantity=quantity)
+        book_copy = Books(title=title, isbn=isbn, genres=genres, author=author, pages=pages, quantity=quantity)
         return jsonify({'msg' : 'New Book added successfully'}),200
     
-    
+
+bookdetails = Blueprint('bookdetails',__name__)
+
+@bookdetails.route('/',methods=['GET'])
+def book_details():
+     
+     title = request.json.get('title')
+     author = request.json.get('author')
+     
+     if not title or not author:
+          return jsonify({'msg' : 'All credentials required'}),400
+     
+     book = Books.selectBy(title=title, author=author).getOne(None)
+     if book:
+          book_info = {'id' : book.id, 'title' : book.title, 'genres' : book.genres, 'isbn' : book.isbn, 'author' : book.author, 'pages' : book.pages, 'quantity' : book.quantity, 'Rating' : book.Ratings}
+          return jsonify(book_info)
+          
+     return jsonify({'msg' : 'student not found'}),404
+     
+
+
+genrebasedbook = Blueprint('genresbasedbook',__name__)
+
+@genrebasedbook.route('/',methods=['GET'])
+def genrebased_book():
+     category = request.json.get('category')
+     if not category:
+          return jsonify({'msg' : 'All credentials required'}),400
+
+     booklist = Books.selectBy(genres=category)
+     if booklist:
+          for book in booklist:
+               book_info = []
+               book_info.append({"id" : book.id, "title" : book.title, "author" : book.author, "available copies" : book.quantity, "rating" : book.Ratings})
+               return jsonify(book_info),200
+     return jsonify({'msg' : 'Sorry, we could not find a book matching your search criteria'}),404
+
+
 bookborrowed = Blueprint('bookborrowd',__name__)
 
 @bookborrowed.route('/',methods=['GET'])
@@ -228,9 +283,10 @@ def top_readers():
      readerslist = []
 
      for reader in top_readers:
-          readerslist.append({'Name' : reader.Name,'Totalbookreads' : reader.Readerpoints})
+          readerslist.append({'id' : reader.id ,'Name' : reader.Name,'Totalbookreads' : reader.Readerpoints})
 
      return jsonify(readerslist)
+
 
 highdemandbook = Blueprint('highdemandbook',__name__)
 
@@ -245,7 +301,7 @@ def highdemand_book():
      books_list = []
 
      for top_book in top_books:
-          books_list.append({'Title' : top_book.title,'Quantity' : top_book.quantity,'Rating' : top_book.Ratings})
+          books_list.append({'Title' : top_book.title, 'Genres' : top_book.genres , 'Quantity' : top_book.quantity,'Rating' : top_book.Ratings})
      return jsonify(books_list)
           
 
