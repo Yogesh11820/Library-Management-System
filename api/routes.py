@@ -95,10 +95,10 @@ def genrebased_book():
 
      booklist = Books.selectBy(genres=category)
      if booklist:
+          book_info = []
           for book in booklist:
-               book_info = []
                book_info.append({"id" : book.id, "title" : book.title, "author" : book.author, "available copies" : book.quantity, "rating" : book.Ratings})
-               return jsonify(book_info),200
+          return jsonify(book_info)
      return jsonify({'msg' : 'Sorry, we could not find a book matching your search criteria'}),404
 
 

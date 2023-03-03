@@ -90,7 +90,14 @@ def test_book_borrowed():
       assert response.status_code == 503
       assert json.loads(response.content) == {'msg' : 'book out of stock'}
 
-    # add debt test
+     #Debt more than 500
+
+      data = {"Roll_No" : 101, "book_name" : "Alchemist" }
+
+      response = requests.get(url,json=data)
+
+      assert response.status_code == 403
+      assert json.loads(response.content) == {'msg' : 'Sorry, We can not issued you the book because youre debt is more than 500 '}
     
      # student not found 
 
